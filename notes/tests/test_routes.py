@@ -16,8 +16,8 @@ class TestRoutes(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Автор заметки')
-        cls.reader = User.objects.create(username='Читатель')
+        cls.author = User.objects.create(username='Наруто Удзумаки')
+        cls.reader = User.objects.create(username='Саске Учиха')
         cls.note = Note.objects.create(
             title='Заголовок',
             text='Текст',
