@@ -65,7 +65,7 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertRedirects(response, redirect_url)
 
-    def test__pages_aviability_for_login_user(self):
+    def test__pages_aviability_for_autorized_client(self):
         self.client.force_login(self.author)
         for name in (
             'notes:home',
