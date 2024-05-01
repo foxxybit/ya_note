@@ -52,6 +52,3 @@ class TestFormAndListPages(TestCase):
     def test_user_cant_see_notes_of_other_user(self):
         response = self.auth_client.get(self.list_url)
         self.assertNotIn(self.reader_list, response.context['object_list'])
-        # self.client.force_login(self.reader)
-        # response = self.client.get(self.list_url)
-        # self.assertNotIn(self.note, response.context['object_list'])
