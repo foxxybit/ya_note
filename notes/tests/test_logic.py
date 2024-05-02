@@ -3,7 +3,7 @@ from pytils.translit import slugify
 
 from django.urls import reverse
 
-from .mixins import AuthorLoginMixin, NoteMixin, ReaderLoginMixin
+from .mixins import NoteMixin, ReaderLoginMixin
 from notes.forms import WARNING
 from notes.models import Note
 
@@ -14,12 +14,12 @@ NEW_NOTE_TEXT = 'Обновленная заметка'
 NOTE_SLUG = 'test'
 
 
-class TestNoteCreation(AuthorLoginMixin):
+class TestNoteCreation(ReaderLoginMixin):
 
     @classmethod
     def setUpTestData(cls):
         cls.url = reverse('notes:add')
-        AuthorLoginMixin.setUpTestData()
+        ReaderLoginMixin.setUpTestData()
         cls.form_data = {
             'title': NOTE_TEXT,
             'text': NOTE_TEXT,
@@ -32,7 +32,7 @@ class TestNoteCreation(AuthorLoginMixin):
         self.assertEqual(notes_count, 0)
 
     def test_user_can_create_note(self):
-        response = self.author_client.post(self.url, data=self.form_data)
+        response = self.reader_client.post(self.url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
@@ -40,16 +40,16 @@ class TestNoteCreation(AuthorLoginMixin):
         self.assertEqual(note.text, NOTE_TEXT)
         self.assertEqual(note.title, NOTE_TEXT)
         self.assertEqual(note.slug, NOTE_SLUG)
-        self.assertEqual(note.author, self.author)
+        self.assertEqual(note.author, self.reader)
 
     def user_cant_create_not_unique_slug(self):
         note = Note.objects.create(
             title=NOTE_TEXT,
             text=NOTE_TEXT,
-            author=self.author
+            author=self.reader
         )
         self.form_data['slug'] = note.slug
-        response = self.author_client.post(self.url, data=self.form_data)
+        response = self.reader_client.post(self.url, data=self.form_data)
         self.assertFormError(
             response,
             form='form',
@@ -61,7 +61,7 @@ class TestNoteCreation(AuthorLoginMixin):
 
     def test_empty_slug(self):
         self.form_data.pop('slug')
-        response = self.author_client.post(self.url, data=self.form_data)
+        response = self.reader_client.post(self.url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
