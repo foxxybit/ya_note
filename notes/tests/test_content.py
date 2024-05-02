@@ -1,26 +1,19 @@
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
 from django.urls import reverse
 
-from notes.forms import NoteForm
+from .mixins import NoteMixin, ReaderMixin
 from notes.models import Note
+from notes.forms import NoteForm
 
 User = get_user_model()
 
 
-class TestFormAndListPages(TestCase):
+class TestFormAndListPages(NoteMixin, ReaderMixin):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Аска Лэнгли')
-        cls.auth_client = Client()
-        cls.auth_client.force_login(cls.author)
-        cls.reader = User.objects.create(username='Рей Аянами')
-        cls.note = Note.objects.create(
-            title='Заголовок',
-            text='Текст',
-            author=cls.author
-        )
+        ReaderMixin.setUpTestData()
+        NoteMixin.setUpTestData()
         readers_notes = [
             Note(
                 title='Заголовок',
@@ -41,14 +34,14 @@ class TestFormAndListPages(TestCase):
         for name, args in urls:
             with self.subTest(name=name):
                 url = reverse(name, args=args)
-                response = self.auth_client.get(url)
+                response = self.author_client.get(url)
                 self.assertIn('form', response.context)
                 self.assertIsInstance(response.context['form'], NoteForm)
 
     def test_note_on_notes_list(self):
-        response = self.auth_client.get(self.list_url)
+        response = self.author_client.get(self.list_url)
         self.assertIn(self.note, response.context['object_list'])
 
     def test_user_cant_see_notes_of_other_user(self):
-        response = self.auth_client.get(self.list_url)
+        response = self.author_client.get(self.list_url)
         self.assertNotIn(self.reader_list, response.context['object_list'])

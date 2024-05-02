@@ -1,28 +1,17 @@
 from http import HTTPStatus
 
-
-from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
 
-
-from notes.models import Note
-
-
-User = get_user_model()
+from .mixins import NoteMixin, ReaderMixin
 
 
-class TestRoutes(TestCase):
+class TestRoutes(NoteMixin, ReaderMixin):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Наруто Удзумаки')
-        cls.reader = User.objects.create(username='Саске Учиха')
-        cls.note = Note.objects.create(
-            title='Заголовок',
-            text='Текст',
-            author=cls.author
-        )
+
+        ReaderMixin.setUpTestData()
+        NoteMixin.setUpTestData()
 
     def test_pages_aviability_for_anonymous_client(self):
         for name in (
